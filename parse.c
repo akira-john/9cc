@@ -19,6 +19,7 @@ Node *new_num(int val) {
   return node;
 }
 
+Node *stmt();
 Node *expr();
 Node *equality();
 Node *relational();
@@ -26,6 +27,24 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+
+Node *program(void) {
+  Node head = {};
+  Node *cur = &head;
+
+  while (!at_eof()) {
+    cur->next = stmt();
+    cur = cur->next;
+  }
+  return head.next;
+}
+
+// stmt = expr ";"
+Node *stmt(void) {
+  Node *node = expr();
+  expect(";");
+  return node;
+}
 
 // expr = equality
 Node *expr() {

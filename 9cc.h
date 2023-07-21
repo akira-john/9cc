@@ -12,6 +12,7 @@
 // トークンの種類
 typedef enum {
   TK_RESERVED, // 記号
+  TK_IDENT,    // 識別子
   TK_NUM,      // 整数トークン
   TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
@@ -46,6 +47,8 @@ typedef enum {
   ND_SUB, // -
   ND_MUL, // *
   ND_DIV, // /
+  ND_ASSIGN, // =
+  ND_LVAR,   // ローカル変数
   ND_EQ,  // ==
   ND_NE,  // !=
   ND_LT,  // <
@@ -57,12 +60,14 @@ typedef struct Node Node;
 // AST node type
 struct Node {
   NodeKind kind; // Node kind
+  Node *next;
   Node *lhs;     // Left-hand side
   Node *rhs;     // Right-hand side
   int val;       // Used if kind == ND_NUM
+  int offset;
 };
 
-Node *expr();
+Node *program();
 
 // 
 // codegen.c
