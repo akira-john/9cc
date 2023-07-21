@@ -1,8 +1,13 @@
-CFLAGS=-std=c11 -g -static
+CFLAGS=-std=c11 -g -static -fno-common
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
 
-9cc: 9cc.c
+9cc: $(OBJS)
+	$(CC) -o 9cc $(OBJS) $(LDFLAGS)
 
-test: 9cc 
+$(OBJS): 9cc.h
+
+test: 9cc
 	./test.sh
 
 clean:
