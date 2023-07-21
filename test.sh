@@ -23,5 +23,8 @@ assert 41 " 12 + 34 - 5 "
 assert 144 " 12 * (13 - 1) "
 assert 7 " 1 + 2 * 3 "
 assert 10 " -4 * 10 + 5 * +10 "
+assert 1 " 10*-1+11==1 "
+assert 1 " 20+1 <= 21 "
+assert 0 "15 > 15"
 
 echo OK
