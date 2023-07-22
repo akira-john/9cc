@@ -38,6 +38,13 @@ bool consume(char* op) {
   return true;
 }
 
+Token *consume_ident(){
+  if(token->kind != TK_IDENT) return NULL;
+  Token *t = token;
+  token = token->next;
+  return t;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char* op) {
@@ -102,6 +109,12 @@ Token *tokenize() {
     if(startswith(p, "return") && !is_alnum(p[6])){
       cur = new_token(TK_RESERVED, cur, p, 6);
       p += 6;
+      continue;
+    }
+
+    // 変数
+    if('a' <= *p && *p <= 'z'){
+      cur = new_token(TK_IDENT, cur, p++, 1);
       continue;
     }
 
