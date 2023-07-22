@@ -30,6 +30,7 @@ assert 1 'return 20+1 <= 21 ;'
 assert 0 'return 15 > 15;'
 assert 2 '2; return 1+1;'
 
-assert 20 'a=2; b=10; return a*b;'
+assert 20 'foo=2; bar=10; return foo*bar;'
+assert 11 'f1 = 30; f2 = 19; return f2-f1;'
 
 echo OK
