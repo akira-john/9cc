@@ -54,6 +54,7 @@ typedef enum {
   ND_LT,  // <
   ND_LE,  // <=
   ND_RETURN,  // return
+  ND_EXPR_STMT, // 式文
   ND_NUM, // 整数
 } NodeKind;
 

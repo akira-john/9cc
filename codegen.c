@@ -9,6 +9,10 @@ void gen(Node *node) {
     printf("  pop rax\n");
     printf("  ret\n");
     return;
+  }else if(node->kind==ND_EXPR_STMT){
+    gen(node->lhs);
+    printf("  add rsp, 8\n");
+    return;
   }
 
   gen(node->lhs);
@@ -64,7 +68,6 @@ void codegen(Node *node) {
 
   for(Node *n = node; n; n = n->next){
     gen(n);
-    printf("  pop rax\n");
   }
 
   printf("  ret\n");
