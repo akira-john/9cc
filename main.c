@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
     offset += 8;
     var->offset = offset;
   }
+  prog->stack_size = offset;
 
   codegen(prog);
 

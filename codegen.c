@@ -1,7 +1,9 @@
 #include "9cc.h"
 
+static int labelseq = 1;
+
 void gen_addr(Node *node){
-  if(node->kind==ND_VAR){
+  if (node->kind == ND_VAR) {
     // ローカル変数のベースポインタからのオフセット
     printf("  lea rax, [rbp-%d]\n", node->var->offset);
     printf("  push rax\n");
@@ -25,7 +27,7 @@ void store(){
 }
 
 void gen(Node *node) {
-  switch(node->kind){
+  switch (node->kind) {
   case ND_NUM:
     printf("  push %d\n", node->val);
     return;
@@ -42,6 +44,28 @@ void gen(Node *node) {
     gen(node->rhs);
     store();
     return;
+  case ND_IF: {
+    int seq = labelseq++;
+    if (node->els) {
+      gen(node->cond);
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");
+      printf("  je  .L.else.%d\n", seq);
+      gen(node->then);
+      printf("  jmp .L.end.%d\n", seq);
+      printf(".L.else.%d:\n", seq);
+      gen(node->els);
+      printf(".L.end.%d:\n", seq);
+    } else {
+      gen(node->cond);
+      printf("  pop rax\n");
+      printf("  cmp rax, 0\n");
+      printf("  je  .L.end.%d\n", seq);
+      gen(node->then);
+      printf(".L.end.%d:\n", seq);
+    }
+    return;
+  }
   case ND_RETURN:
     gen(node->lhs);
     printf("  pop rax\n");
@@ -105,8 +129,8 @@ void codegen(Function *prog) {
   printf("  mov rbp, rsp\n");
   printf("  sub rsp, %d\n", prog->stack_size);
 
-  for(Node *n = prog->node; n; n = n->next){
-    gen(n);
+  for(Node *node = prog->node; node; node = node->next){
+    gen(node);
   }
 
   // Epilogue

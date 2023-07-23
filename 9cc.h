@@ -30,7 +30,7 @@ struct Token {
 
 extern void error(char *fmt, ...);
 extern void error_at(char *loc, char *fmt, ...);
-extern bool consume(char* op);
+extern bool consume(char *op);
 extern Token *consume_ident();
 void expect(char *op);
 int expect_number();
@@ -57,13 +57,13 @@ typedef enum {
   ND_SUB, // -
   ND_MUL, // *
   ND_DIV, // /
-  ND_LVAR,   // ローカル変数
   ND_EQ,  // ==
   ND_NE,  // !=
   ND_LT,  // <
   ND_LE,  // <=
   ND_ASSIGN,  // =
   ND_RETURN,  // return
+  ND_IF,  // "if"
   ND_EXPR_STMT, // 式文
   ND_VAR, // 変数
   ND_NUM, // 整数
@@ -74,11 +74,17 @@ typedef struct Node Node;
 struct Node {
   NodeKind kind; // Node kind
   Node *next;
+
   Node *lhs;     // Left-hand side
   Node *rhs;     // Right-hand side
+
+  // "if"
+  Node *cond;
+  Node *then;
+  Node *els;
+
   Var *var;     // Used if kind == ND_VAR
-  int val;       // Used if kind == ND_NUM
-  int offset;
+  int val;      // Used if kind == ND_NUM
 };
 
 typedef struct Function Function;

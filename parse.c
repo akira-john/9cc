@@ -3,12 +3,12 @@
 Var *locals;
 
 Var *find_var(Token *tok) {
-  for(Var *var=locals; var; var=var->next){
-    if(strlen(var->name)==tok->len && !strncmp(tok->str, var->name, tok->len)){
+  for (Var *var = locals; var; var = var->next){
+    if (strlen(var->name) == tok->len && !strncmp(tok->str, var->name, tok->len)){
       return var;
     }
-    return NULL;
   }
+  return NULL;
 }
 
 Node *new_node(NodeKind kind) {
@@ -77,14 +77,31 @@ Function *program(void) {
   return prog;
 }
 
+Node *read_expr_stmt() {
+  return new_unary(ND_EXPR_STMT, expr());
+}
+
 // stmt = "return" expr ";" | expr ";"
 Node *stmt(void) {
-  if(consume("return")){
+  if (consume("return")) {
     Node *node = new_unary(ND_RETURN, expr());
     expect(";");
     return node;
   }
-  Node *node = new_unary(ND_EXPR_STMT, expr());
+
+  if (consume("if")) {
+    Node *node = new_node(ND_IF);
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->then = stmt();
+    if(consume("else")){
+      node->els = stmt();
+    }
+    return node;
+  }
+
+  Node *node = read_expr_stmt();
   expect(";");
   return node;
 }
@@ -97,7 +114,7 @@ Node *expr() {
 // assign = equality ("=" assign)?
 Node *assign(){
   Node *node = equality();
-  if(consume("=")){
+  if (consume("=")){
     node = new_binary(ND_ASSIGN, node, assign());
   }
   return node;
@@ -180,9 +197,9 @@ Node *primary() {
   }
 
   Token *tok = consume_ident();
-  if(tok){
+  if (tok) {
     Var *var = find_var(tok);
-    if(!var){
+    if (!var){
       var = new_lvar(strndup(tok->str, tok->len));
     }
     return new_var_node(var);
