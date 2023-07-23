@@ -38,5 +38,8 @@ assert 17 'a=1; b=15; if(a>=b) return 0; return 17;'
 
 assert 16 'a=16; b=15; while(a<b) a=a*2; return a;'
 
+assert 51 'i=0; j=0; for(i=1; i<=16; i=i+3) j=i+j; return j;'
+assert 1  'for(;;) return 1; return 2;'
+
 echo ""
 echo SUCCESS !!!!!!!!!!
