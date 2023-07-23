@@ -81,7 +81,6 @@ Node *read_expr_stmt() {
   return new_unary(ND_EXPR_STMT, expr());
 }
 
-// stmt = "return" expr ";" | expr ";"
 Node *stmt(void) {
   if (consume("return")) {
     Node *node = new_unary(ND_RETURN, expr());
@@ -98,6 +97,15 @@ Node *stmt(void) {
     if(consume("else")){
       node->els = stmt();
     }
+    return node;
+  }
+
+  if (consume("while")) {
+    Node *node = new_node(ND_WHILE);
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->then = stmt();
     return node;
   }
 

@@ -36,5 +36,7 @@ assert 11 'f1 = 30; f2 = 19; return f1-f2;'
 assert 3 'if(1) return 3; return 1;'
 assert 17 'a=1; b=15; if(a>=b) return 0; return 17;'
 
+assert 16 'a=16; b=15; while(a<b) a=a*2; return a;'
+
 echo ""
 echo SUCCESS !!!!!!!!!!
