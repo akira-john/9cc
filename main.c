@@ -10,14 +10,15 @@ int main(int argc, char **argv) {
   token = tokenize();
   Function *prog = program();
 
-  int offset = 0;
-  for(Var *var = prog->locals; var; var = var->next) {
-    // 8 でいいの？？
-    offset += 8;
-    var->offset = offset;
+  for (Function *fn = prog; fn; fn = fn->next) {
+    int offset = 0;
+    for(Var *var = prog->locals; var; var = var->next) {
+      // 8 でいいの？？
+      offset += 8;
+      var->offset = offset;
+    }
+    fn->stack_size = offset;
   }
-  prog->stack_size = offset;
-
   codegen(prog);
 
   return 0;
