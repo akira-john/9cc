@@ -1,16 +1,11 @@
 #!/bin/bash
-cat << EOF | gcc -xc -c -o tmp2.o -
-int ret3() {return 3;}
-int ret5() {return 5;}
-int add(int a, int b) {return a+b;}
-EOF
 
 assert() {
   expected="$1"
   input="$2"
 
   ./9cc "$input" > tmp.s
-  cc -o tmp tmp.s tmp2.o
+  cc -o tmp tmp.s
   ./tmp
   actual="$?"
 
@@ -43,9 +38,9 @@ assert 16 'main() {a=16; b=15; while(a<b) a=a*2; return a;}'
 assert 51 'main() {i=0; j=0; for(i=1; i<=16; i=i+3) j=i+j; return j;}'
 assert 1 'main() {for(;;) return 1; return 2;}'
 assert 5 'main() {a=1; b=1; while(a<5){a=a+1; b=b+1;} return b;}'
-
-assert 3 'main() {return ret3();}'
-assert 5 'main() {return add(6, -1);}'
+# 関数宣言
+assert 4 'main() {return add(1, 3);} add(x, y){return x+y;}'
+assert 4 'main() {return dfs(0, -1);} dfs(v, par){if(v==5){return par;} return dfs(v+1, v);}'
 
 echo ""
 echo SUCCESS !!!!!!!!!!
