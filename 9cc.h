@@ -30,7 +30,8 @@ struct Token {
 
 extern void error(char *fmt, ...);
 extern void error_at(char *loc, char *fmt, ...);
-extern bool consume(char *op);
+void error_tok(Token *tok, char *fmt, ...);
+Token *consume(char *op);
 extern Token *consume_ident();
 void expect(char *op);
 int expect_number();
@@ -84,6 +85,7 @@ typedef struct Node Node;
 struct Node {
   NodeKind kind; // Node kind
   Node *next;
+  Token *tok;
 
   Node *lhs;     // Left-hand side
   Node *rhs;     // Right-hand side
