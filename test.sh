@@ -2,6 +2,7 @@
 cat << EOF | gcc -xc -c -o tmp2.o -
 int ret3() {return 3;}
 int ret5() {return 5;}
+int add(int a, int b) {return a+b;}
 EOF
 
 assert() {
@@ -44,6 +45,7 @@ assert 1  'for(;;) return 1; return 2;'
 assert 5 'a=1; b=1; while(a<5){a=a+1; b=b+1;} return b;'
 
 assert 3 'return ret3();'
+assert 5 'return add(6, -1);'
 
 echo ""
 echo SUCCESS !!!!!!!!!!
