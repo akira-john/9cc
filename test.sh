@@ -41,6 +41,9 @@ assert 5 'main() {a=1; b=1; while(a<5){a=a+1; b=b+1;} return b;}'
 # 関数宣言
 assert 4 'main() {return add(1, 3);} add(x, y){return x+y;}'
 assert 4 'main() {return dfs(0, -1);} dfs(v, par){if(v==5){return par;} return dfs(v+1, v);}'
+# 参照
+assert 3 'main() {x=3; y=&x; return *y;}'
+assert 8 'main() {x=3; y=&x; *y=x+5; return x;}'
 
 echo ""
 echo SUCCESS !!!!!!!!!!
