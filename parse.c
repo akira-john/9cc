@@ -89,10 +89,22 @@ Type *basetype() {
   return ty;
 }
 
+Type *read_type_suffix(Type *base) {
+  if (!consume("[")) {
+    return base;
+  }
+  int sz = expect_number();
+  expect("]");
+  return array_of(base, sz);
+}
+
 VarList *read_func_param() {
-  VarList *vl = calloc(1, sizeof(VarList));
   Type *ty = basetype();
-  vl->var = new_lvar(expect_ident(), ty);
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+
+  VarList *vl = calloc(1, sizeof(VarList));
+  vl->var = new_lvar(name, ty);
   return vl;
 }
 
@@ -140,7 +152,9 @@ Function *function(){
 Node *declaration() {
   Token *tok = token;
   Type *ty = basetype();
-  Var *var = new_lvar(expect_ident(), ty);
+  char *name = expect_ident();
+  ty = read_type_suffix(ty);
+  Var *var = new_lvar(name, ty);
 
   if (consume(";")) {
     return new_node(ND_NULL, tok);
