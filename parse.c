@@ -95,6 +95,7 @@ Type *read_type_suffix(Type *base) {
   }
   int sz = expect_number();
   expect("]");
+  base = read_type_suffix(base);
   return array_of(base, sz);
 }
 
