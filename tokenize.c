@@ -47,6 +47,15 @@ Token *consume(char *op) {
   return t;
 }
 
+// 現在のトークンと与えられた文字列がマッチしていれば true を返す
+Token *peek(char *s) {
+  if (token->kind != TK_RESERVED || strlen(s) != token->len || \
+    strncmp(token->str, s, token->len)){
+      return NULL;
+  }
+  return token;
+}
+
 Token *consume_ident(){
   if(token->kind != TK_IDENT) return NULL;
   Token *t = token;
@@ -54,12 +63,12 @@ Token *consume_ident(){
   return t;
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進める。
+// 次のトークンが与えられた文字列のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
-void expect(char *op) {
-  if (token->kind != TK_RESERVED || strlen(op) != token->len ||
-       strncmp(token->str, op, token->len))
-    error_tok(token, "'%s'ではありません", op);
+void expect(char *s) {
+  if (!peek(s)) {
+    error_tok(token, "\"%s\" ではありません", s);
+  }
   token = token->next;
 }
 
@@ -112,7 +121,7 @@ bool is_alnum(char c){
 }
 
 char *starts_with_reserved(char *p){
-  static char *kw[] = {"return", "if", "else", "while", "for"};
+  static char *kw[] = {"return", "if", "else", "while", "for", "int"};
 
   for(int i=0; i<sizeof(kw)/sizeof(*kw); i++) {
     int len = strlen(kw[i]);

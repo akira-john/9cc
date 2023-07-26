@@ -34,6 +34,7 @@ extern void error(char *fmt, ...);
 extern void error_at(char *loc, char *fmt, ...);
 void error_tok(Token *tok, char *fmt, ...);
 Token *consume(char *op);
+Token *peek(char *s);
 extern Token *consume_ident();
 void expect(char *op);
 int expect_number();
@@ -52,6 +53,7 @@ extern Token *token;
 typedef struct Var Var;
 struct Var {
   char *name;
+  Type *ty;
   int offset;
 };
 
@@ -85,6 +87,7 @@ typedef enum {
   ND_EXPR_STMT, // 式文
   ND_VAR, // 変数
   ND_NUM, // 整数
+  ND_NULL, // 空
 } NodeKind;
 
 typedef struct Node Node;
@@ -139,7 +142,10 @@ struct Type {
   Type *base;
 };
 
+extern Type *int_type;
+
 bool is_integer(Type *ty);
+Type *pointer_to(Type *base);
 void add_type(Node *node);
 
 // 
