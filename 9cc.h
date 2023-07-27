@@ -50,12 +50,15 @@ extern Token *token;
 // parse.c
 //
 
-// ローカル変数
+// 変数
 typedef struct Var Var;
 struct Var {
   char *name;
   Type *ty;
-  int offset;
+  bool is_local;
+
+  // Local variable
+  int offset; // Offset from RBP
 };
 
 typedef struct VarList VarList;
@@ -130,13 +133,23 @@ struct Function {
   int stack_size;
 };
 
-Function *program();
+typedef struct {
+  VarList *globals;
+  Function *fns;
+} Program;
+
+Program *program();
 
 // 
 // typing.c
 // 
 
-typedef enum {TY_INT, TY_PTR, TY_ARRAY} TypeKind;
+typedef enum {
+  TY_CHAR,
+  TY_INT,
+  TY_PTR,
+  TY_ARRAY,
+} TypeKind;
 
 struct Type {
   TypeKind kind;
@@ -146,6 +159,7 @@ struct Type {
 };
 
 extern Type *int_type;
+extern Type *char_type;
 
 bool is_integer(Type *ty);
 Type *pointer_to(Type *base);
@@ -156,4 +170,4 @@ void add_type(Node *node);
 // codegen.c
 // 
 
-void codegen(Function *prog);
+void codegen(Program *prog);

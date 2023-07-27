@@ -5,7 +5,7 @@ assert() {
   input="$2"
 
   ./9cc "$input" > tmp.s
-  cc -o tmp tmp.s
+  cc -static -o tmp tmp.s
   ./tmp
   actual="$?"
 
@@ -61,6 +61,12 @@ assert 6 'int main() { int x[2][3]; int *y=x; y[6]=6; return x[2][0]; }'
 assert 8 'int main() { int x; return sizeof(x);}'
 assert 96 'int main() { int x[3][4]; return sizeof x;}'
 assert 32 'int main() { int x[3][4]; return sizeof *x;}'
+# グローバル変数
+assert 3 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[3]; }'
+assert 8 'int x; int main() { return sizeof(x); }'
+assert 32 'int x[4]; int main() { return sizeof(x); }'
+# char
+assert 1 'int main() {char x=1; return 1;}'
 
 echo ""
 echo SUCCESS !!!!!!!!!!

@@ -1,6 +1,7 @@
 #include "9cc.h"
 
-static char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *argreg1[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
+static char *argreg8[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 static int labelseq = 1;
 static char *funcname;
@@ -8,12 +9,18 @@ static char *funcname;
 void gen(Node *node);
 
 void gen_addr(Node *node){
-  switch (node->kind){
-    case ND_VAR:
-      // ローカル変数のベースポインタからのオフセット
-      printf("  lea rax, [rbp-%d]\n", node->var->offset);
-      printf("  push rax\n");
+  switch (node->kind) {
+    case ND_VAR: {
+      Var *var = node->var;
+      if (var->is_local) {
+        // ローカル変数のベースポインタからのオフセット
+        printf("  lea rax, [rbp-%d]\n", var->offset);
+        printf("  push rax\n");
+      } else {
+        printf("  push offset %s\n", var->name);
+      }
       return;
+    }
     case ND_DEREF:
       gen(node->lhs);
       return;
@@ -23,22 +30,30 @@ void gen_addr(Node *node){
 }
 
 void gen_lval(Node *node) {
-  if(node->ty->kind == TY_ARRAY) {
+  if (node->ty->kind == TY_ARRAY) {
     error_tok(node->tok, "変数名ではありません");
   }
   gen_addr(node);
 }
 
-void load(){
+void load(Type *ty){
   printf("  pop rax\n");
-  printf("  mov rax, [rax]\n");
+  if (ty->size == 1) {
+    printf("  movsx rax, byte ptr [rax]\n");
+  }else {
+    printf("  mov rax, [rax]\n");
+  }
   printf("  push rax\n");
 }
 
-void store(){
+void store(Type *ty){
   printf("  pop rdi\n");
   printf("  pop rax\n");
-  printf("  mov [rax], rdi\n");
+  if (ty->size == 1) {
+    printf("  mov [rax], dil\n");
+  }else {
+    printf("  mov [rax], rdi\n");
+  }
   printf("  push rdi\n");
 }
 
@@ -56,13 +71,13 @@ void gen(Node *node) {
   case ND_VAR:
     gen_addr(node);
     if (node->ty->kind != TY_ARRAY) {
-      load();
+      load(node->ty);
     }
     return;
   case ND_ASSIGN:
     gen_lval(node->lhs);
     gen(node->rhs);
-    store();
+    store(node->ty);
     return;
   case ND_ADDR:
     gen_addr(node->lhs);
@@ -70,7 +85,7 @@ void gen(Node *node) {
   case ND_DEREF:
     gen(node->lhs);
     if (node->ty->kind != TY_ARRAY) {
-      load();
+      load(node->ty);
     }
     return;
   case ND_IF: {
@@ -138,7 +153,7 @@ void gen(Node *node) {
     }
 
     for (int i = nargs - 1; i >= 0; i--){
-      printf("  pop %s\n", argreg[i]);
+      printf("  pop %s\n", argreg8[i]);
     }
 
     // push や pop が 8 バイト単位で RSP を操作する都合上、
@@ -226,10 +241,30 @@ void gen(Node *node) {
   printf("  push rax\n");
 }
 
-void codegen(Function *prog) {
-  printf(".intel_syntax noprefix\n");
+void emit_data(Program *prog) {
+  printf(".data\n");
 
-  for (Function *fn = prog; fn; fn = fn->next) {
+  for (VarList *vl = prog->globals; vl; vl = vl->next) {
+    Var *var = vl->var;
+    printf("%s:\n", var->name);
+    printf("  .zero %d\n", var->ty->size);
+  }
+}
+
+void load_arg(Var *var, int idx) {
+  int sz = var->ty->size;
+  if (sz == 1) {
+    printf("  mov [rpb-%d], %s\n", var->offset, argreg1[idx]);
+  } else {
+    assert(sz == 8);
+    printf("  mov [rbp-%d], %s\n", var->offset, argreg8[idx]);
+  }
+}
+
+void emit_text(Program *prog) {
+  printf(".text\n");
+
+  for (Function *fn = prog->fns; fn; fn = fn->next) {
     printf(".global %s\n", fn->name);
     printf("%s:\n", fn->name);
     funcname = fn->name;
@@ -242,8 +277,7 @@ void codegen(Function *prog) {
     // args をスタックへ
     int i = 0;
     for (VarList *vl = fn->params; vl; vl = vl->next) {
-      Var *var = vl->var;
-      printf("  mov [rbp-%d], %s\n", var->offset, argreg[i++]);
+      load_arg(vl->var, i++);
     }
 
     for (Node *node = fn->node; node; node = node->next){
@@ -256,4 +290,10 @@ void codegen(Function *prog) {
     printf("  pop rbp\n");
     printf("  ret\n");
   }
+}
+
+void codegen(Program *prog) {
+  printf(".intel_syntax noprefix\n");
+  emit_data(prog);
+  emit_text(prog);
 }
