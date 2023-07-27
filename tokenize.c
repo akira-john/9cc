@@ -154,6 +154,19 @@ Token *tokenize() {
       continue;
     }
 
+    // 文字列リテラル
+    if (*p == '"') {
+      char *q = p++;
+      while (*p && *p != '"') p++;
+      if (!*p) error_at(q, "文字列リテラルが閉じられていません");
+      p++;
+
+      cur = new_token(TK_STR, cur, q, p-q);
+      cur->contents = strndup(q+1, p-q-2);
+      cur->cont_len = p-q-1;
+      continue;
+    }
+
     // 予約語と演算子を同時に処理
     char *kw = starts_with_reserved(p);
     if (kw) {

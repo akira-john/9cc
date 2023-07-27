@@ -67,6 +67,11 @@ assert 8 'int x; int main() { return sizeof(x); }'
 assert 32 'int x[4]; int main() { return sizeof(x); }'
 # char
 assert 1 'int main() {char x=1; return 1;}'
+# 文字列リテラル
+assert 97 'int main () { return "abc"[0]; }'
+assert 98 'int main() { return "abc"[1]; }'
+assert 0 'int main() { return "abc"[3]; }'
+assert 4 'int main() { return sizeof("abc"); }'
 
 echo ""
 echo SUCCESS !!!!!!!!!!
